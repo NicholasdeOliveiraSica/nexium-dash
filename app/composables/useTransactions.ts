@@ -49,10 +49,18 @@ export function useTransactions() {
     category: string
     created_at?: string
   }) {
-    if (!user.value) throw new Error('Usuário não autenticado.')
+    let userId = user.value?.id
+    if (!userId) {
+      const { data } = await supabase.auth.getUser()
+      userId = data.user?.id
+    }
+
+    if (!userId) {
+      throw new Error('Sessão não encontrada ou expirada. Por favor, faça login novamente.')
+    }
 
     const newTx: TransactionInsert = {
-      user_id: user.value.id,
+      user_id: userId,
       description: payload.description,
       amount: payload.amount,
       type: payload.type,
