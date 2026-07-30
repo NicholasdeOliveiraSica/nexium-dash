@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { normalizeLoginToEmail } from '~/utils/auth'
+
 definePageMeta({
   layout: 'default'
 })
@@ -6,14 +8,14 @@ definePageMeta({
 const supabase = useSupabaseClient()
 const router = useRouter()
 
-const email = ref('')
+const loginInput = ref('')
 const password = ref('')
 const loading = ref(false)
 const errorMessage = ref('')
 
 async function handleLogin() {
-  if (!email.value || !password.value) {
-    errorMessage.value = 'Por favor, preencha todos os campos.'
+  if (!loginInput.value.trim() || !password.value) {
+    errorMessage.value = 'Por favor, preencha o login e a senha.'
     return
   }
 
@@ -21,14 +23,16 @@ async function handleLogin() {
     loading.value = true
     errorMessage.value = ''
 
+    const emailToUse = normalizeLoginToEmail(loginInput.value)
+
     const { error } = await supabase.auth.signInWithPassword({
-      email: email.value,
+      email: emailToUse,
       password: password.value
     })
 
     if (error) {
       errorMessage.value = error.message === 'Invalid login credentials' 
-        ? 'E-mail ou senha incorretos.' 
+        ? 'Login ou senha incorretos.' 
         : error.message
       return
     }
@@ -51,7 +55,7 @@ async function handleLogin() {
             Nexium Finance
           </h1>
           <p class="text-sm text-neutral-400">
-            Acesse sua conta para gerenciar suas finanças
+            Informe seu login e senha para acessar
           </p>
         </div>
       </template>
@@ -66,13 +70,13 @@ async function handleLogin() {
           class="mb-4"
         />
 
-        <UFormField label="E-mail" required name="email">
+        <UFormField label="Login" required name="loginInput">
           <UInput
-            v-model="email"
-            type="email"
-            placeholder="seu@email.com"
-            icon="i-lucide-mail"
-            autocomplete="email"
+            v-model="loginInput"
+            type="text"
+            placeholder="Ex: mailane ou nicholas"
+            icon="i-lucide-user"
+            autocomplete="username"
             class="w-full"
             :disabled="loading"
           />
@@ -101,15 +105,6 @@ async function handleLogin() {
           Entrar
         </UButton>
       </form>
-
-      <template #footer>
-        <div class="text-center text-sm text-neutral-400">
-          Ainda não tem conta?
-          <NuxtLink to="/register" class="text-primary font-medium hover:underline ml-1">
-            Cadastrar-se
-          </NuxtLink>
-        </div>
-      </template>
     </UCard>
   </div>
 </template>

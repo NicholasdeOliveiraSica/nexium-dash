@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import { normalizeLoginToEmail } from '~/utils/auth'
+
 definePageMeta({
   layout: 'default'
 })
 
 const supabase = useSupabaseClient()
 
-const email = ref('contato.nexium.studio@gmail.com')
+const loginInput = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const loading = ref(false)
@@ -13,7 +15,7 @@ const errorMessage = ref('')
 const successMessage = ref('')
 
 async function handleRegister() {
-  if (!email.value || !password.value || !confirmPassword.value) {
+  if (!loginInput.value.trim() || !password.value || !confirmPassword.value) {
     errorMessage.value = 'Por favor, preencha todos os campos.'
     return
   }
@@ -33,9 +35,16 @@ async function handleRegister() {
     errorMessage.value = ''
     successMessage.value = ''
 
+    const emailToUse = normalizeLoginToEmail(loginInput.value)
+
     const { error } = await supabase.auth.signUp({
-      email: email.value,
-      password: password.value
+      email: emailToUse,
+      password: password.value,
+      options: {
+        data: {
+          username: loginInput.value.trim().toLowerCase()
+        }
+      }
     })
 
     if (error) {
@@ -43,7 +52,7 @@ async function handleRegister() {
       return
     }
 
-    successMessage.value = 'Cadastro realizado com sucesso! Verifique sua caixa de entrada para confirmar o e-mail.'
+    successMessage.value = 'Cadastro realizado com sucesso! Por favor, confirme pelo e-mail enviado.'
   } catch (err: any) {
     errorMessage.value = err?.message || 'Erro inesperado ao realizar cadastro.'
   } finally {
@@ -58,10 +67,10 @@ async function handleRegister() {
       <template #header>
         <div class="text-center space-y-1">
           <h1 class="text-2xl font-bold tracking-tight text-white">
-            Criar Conta - Nexium
+            Cadastrar Novo Usuário
           </h1>
           <p class="text-sm text-neutral-400">
-            Cadastre-se para ter acesso ao controle financeiro
+            Criação de acesso para o sistema financeiro
           </p>
         </div>
       </template>
@@ -85,13 +94,13 @@ async function handleRegister() {
           class="mb-4"
         />
 
-        <UFormField label="E-mail" required name="email" help="E-mail principal para confirmação e acesso">
+        <UFormField label="Novo login" required name="loginInput">
           <UInput
-            v-model="email"
-            type="email"
-            placeholder="contato.nexium.studio@gmail.com"
-            icon="i-lucide-mail"
-            autocomplete="email"
+            v-model="loginInput"
+            type="text"
+            placeholder="Ex: mailane ou nicholas"
+            icon="i-lucide-user-plus"
+            autocomplete="username"
             class="w-full"
             :disabled="loading"
           />
@@ -134,10 +143,9 @@ async function handleRegister() {
       </form>
 
       <template #footer>
-        <div class="text-center text-sm text-neutral-400">
-          Já possui uma conta?
-          <NuxtLink to="/login" class="text-primary font-medium hover:underline ml-1">
-            Fazer login
+        <div class="text-center text-xs text-neutral-500">
+          <NuxtLink to="/login" class="text-neutral-400 hover:text-white underline">
+            Voltar para o login
           </NuxtLink>
         </div>
       </template>

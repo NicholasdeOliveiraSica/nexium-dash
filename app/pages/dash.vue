@@ -21,6 +21,24 @@ const {
   deleteTransaction
 } = useTransactions()
 
+const displayName = computed(() => {
+  const username = user.value?.user_metadata?.username
+  if (typeof username === 'string' && username) {
+    return username.charAt(0).toUpperCase() + username.slice(1)
+  }
+  const email = user.value?.email
+  if (email) {
+    const parts = email.split('+')
+    if (parts.length > 1 && parts[1]) {
+      const alias = parts[1].split('@')[0] || ''
+      if (alias) return alias.charAt(0).toUpperCase() + alias.slice(1)
+    }
+    const name = email.split('@')[0] || ''
+    if (name) return name.charAt(0).toUpperCase() + name.slice(1)
+  }
+  return 'Usuário'
+})
+
 const modalOpen = ref(false)
 const transactionToEdit = ref<Transaction | null>(null)
 
@@ -75,7 +93,7 @@ async function handleLogout() {
           </span>
         </div>
         <p class="text-xs md:text-sm text-neutral-400 mt-1">
-          {{ user?.email || 'Usuário' }} • Controle de movimentações do casal
+          Bem-vindo(a), {{ displayName }} • Controle de movimentações do casal
         </p>
       </div>
 
