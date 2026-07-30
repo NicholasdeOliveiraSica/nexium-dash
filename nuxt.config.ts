@@ -14,6 +14,13 @@ export default defineNuxtConfig({
     }
   },
 
+  icon: {
+    clientBundle: {
+      scan: true
+    },
+    serverBundle: 'remote'
+  },
+
   devtools: {
     enabled: true
   },

@@ -124,10 +124,11 @@ export function useTransactions() {
   let realtimeChannel: ReturnType<typeof supabase.channel> | null = null
 
   function setupRealtime() {
-    if (realtimeChannel) return
+    cleanupRealtime()
 
+    const channelTopic = `transactions-rt-${Math.random().toString(36).substring(7)}`
     realtimeChannel = supabase
-      .channel('public:transactions')
+      .channel(channelTopic)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'transactions' },
