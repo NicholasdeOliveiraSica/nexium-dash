@@ -16,7 +16,7 @@ const { addTransaction, updateTransaction } = useTransactions()
 const toast = useToast()
 
 const description = ref('')
-const amount = ref<number | ''>('')
+const amount = ref<string>('')
 const type = ref<'income' | 'expense'>('expense')
 const category = ref('Alimentação')
 const dateStr = ref(new Date().toISOString().substring(0, 10))
@@ -32,7 +32,7 @@ watch(
     if (isOpen) {
       if (props.transactionToEdit) {
         description.value = props.transactionToEdit.description
-        amount.value = Number(props.transactionToEdit.amount)
+        amount.value = String(props.transactionToEdit.amount)
         type.value = props.transactionToEdit.type
         category.value = props.transactionToEdit.category
         dateStr.value = new Date(props.transactionToEdit.created_at).toISOString().substring(0, 10)
@@ -171,7 +171,7 @@ const defaultCategories = [
         <!-- Valor -->
         <UFormField label="Valor (R$)" required name="amount">
           <UInput
-            v-model.number="amount"
+            v-model="amount"
             type="number"
             step="0.01"
             min="0.01"
